@@ -1,3 +1,4 @@
+require('jest-sorted');
 const request = require('supertest');
 const app = require('../app');
 const db = require('../db/connection');
@@ -41,7 +42,7 @@ describe('1. General errors', () => {
     });
 });
 
-describe('1. GET /api/reviews', () => {
+describe('2. GET /api/reviews', () => {
     test('status:200, responds with array of reviews', () => {
         return request(app)
             .get('/api/reviews')
@@ -64,10 +65,38 @@ describe('1. GET /api/reviews', () => {
                         })
                     );
                 });
-                const dates = reviews.map(review => review.created_at);
-                const orderedDates = [...dates];
-                orderedDates.sort((a, b) => { return new Date(b) - new Date(a) });
-                expect(dates).toEqual(orderedDates);
+                expect(reviews).toBeSortedBy("created_at", { descending: true, coerce: true, });
             });
+    });
+});
+
+describe.only('3. GET /api/reviews/:review_id', () => {
+    test('status:200, responds with a single matching review', () => {
+        const REVIEW_ID = 2;
+        return request(app)
+            .get(`/api/reviews/${REVIEW_ID}`)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.review).toEqual({
+                    review_id: REVIEW_ID,
+                    title: 'Jenga',
+                    designer: 'Leslie Scott',
+                    owner: 'philippaclaire9',
+                    review_img_url: 'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+                    review_body: 'Fiddly fun for all the family',
+                    category: 'dexterity',
+                    created_at: new Date(1610964101251).toISOString(),
+                    votes: 5
+                });
+            });
+    });
+    test('invalid review_id', () => {
+        return request(app)
+            .get('/api/reviews/100')
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("review id doesn't exist")
+            })
+
     });
 });
