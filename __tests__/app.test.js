@@ -1,4 +1,3 @@
-require('jest-sorted');
 const request = require('supertest');
 const app = require('../app');
 const db = require('../db/connection');
@@ -90,12 +89,21 @@ describe.only('3. GET /api/reviews/:review_id', () => {
                 });
             });
     });
-    test('invalid review_id', () => {
+    test('valid id not found', () => {
         return request(app)
             .get('/api/reviews/100')
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("valid id not found")
+            })
+
+    });
+    test('invalid id', () => {
+        return request(app)
+            .get('/api/reviews/hello')
             .expect(400)
             .then(({ body }) => {
-                expect(body.msg).toBe("review id doesn't exist")
+                expect(body.msg).toBe("invalid data type")
             })
 
     });
