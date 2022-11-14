@@ -17,7 +17,6 @@ describe('1. GET /api/categories', () => {
             .expect(200)
             .then(res => {
                 const categories = res.body.categories;
-                expect(categories).toBeInstanceOf(Array);
                 expect(categories).toHaveLength(4);
                 categories.forEach((category) => {
                     expect(category).toEqual(
@@ -39,5 +38,36 @@ describe('1. General errors', () => {
             .then(({ body }) => {
                 expect(body.msg).toBe('Route not found')
             })
+    });
+});
+
+describe('1. GET /api/reviews', () => {
+    test('status:200, responds with array of reviews', () => {
+        return request(app)
+            .get('/api/reviews')
+            .expect(200)
+            .then(res => {
+                const reviews = res.body.reviews;
+                expect(reviews).toHaveLength(13);
+                reviews.forEach((review) => {
+                    expect(review).toEqual(
+                        expect.objectContaining({
+                            title: expect.any(String),
+                            review_id: expect.any(Number),
+                            category: expect.any(String),
+                            review_img_url: expect.any(String),
+                            created_at: expect.any(String),
+                            votes: expect.any(Number),
+                            designer: expect.any(String),
+                            comment_count: expect.any(String),
+                            owner: expect.any(String),
+                        })
+                    );
+                });
+                const dates = reviews.map(review => review.created_at);
+                const orderedDates = [...dates];
+                orderedDates.sort((a, b) => { return new Date(b) - new Date(a) });
+                expect(dates).toEqual(orderedDates);
+            });
     });
 });
