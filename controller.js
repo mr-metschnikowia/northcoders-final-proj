@@ -9,7 +9,8 @@ exports.getReviews = (req, res) => {
 };
 
 exports.getReview = (req, res, next) => {
-    selectReview(req.params.review_id).then(review => res.status(200).send({ review: review }))
+    selectReview(req.params.review_id, req.query.comment_count)
+        .then(review => res.status(200).send({ review: review }))
         .catch(err => next(err));
 };
 
@@ -31,7 +32,9 @@ exports.patchReview = (req, res, next) => {
 };
 
 exports.getUsers = (req, res) => {
-    selectUsers().then(users => res.status(200).send({ users }))
+    selectUsers()
+        .then(users => res.status(200).send({ users }))
+        .catch(err => next(err));
 };
 
 // request validation

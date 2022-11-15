@@ -10,8 +10,13 @@ exports.selectReviews = () => {
         .then(({ rows }) => rows);
 };
 
-exports.selectReview = (review_id) => {
-    return db.query("SELECT * FROM reviews WHERE review_id = $1", [review_id])
+exports.selectReview = (review_id, comment_count) => {
+
+    let query = "SELECT owner, title, review_id, category, review_body, review_img_url, created_at, votes, designer"
+    query += comment_count === "true" ? ", (SELECT COUNT(comment_id) FROM comments WHERE reviews.review_id = comments.review_id) as comment_count" : "";
+    query += " FROM reviews WHERE review_id = $1"
+
+    return db.query(query, [review_id])
         .then(({ rows }) => rows[0] === undefined ? Promise.reject({ status: 404, msg: "valid id not found" }) : rows[0])
 };
 
