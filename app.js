@@ -8,7 +8,8 @@ const {
     postComment,
     validateComment,
     patchReview,
-    validateReviewUpdate
+    validateReviewUpdate,
+    getUsers
 } = require('./controller');
 
 const app = express();
@@ -21,6 +22,7 @@ app.get('/api/reviews/:review_id', getReview);
 app.get('/api/reviews/:review_id/comments', getComments);
 app.post('/api/reviews/:review_id/comments', validateComment, postComment);
 app.patch('/api/reviews/:review_id', validateReviewUpdate, patchReview)
+app.get('/api/users', getUsers);
 
 app.all('/*', (req, res) => {
     res.status(404).send({ msg: 'Route not found' });

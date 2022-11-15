@@ -31,3 +31,8 @@ exports.updateReview = (review_id, review) => {
         [review.inc_votes, review_id])
         .then(({ rows }) => rows[0] === undefined ? Promise.reject({ status: 404, msg: "review id not found" }) : rows[0])
 };
+
+exports.selectUsers = () => {
+    return db.query("SELECT username, name, avatar_url FROM users;")
+        .then(({ rows }) => rows);
+};
