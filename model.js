@@ -18,6 +18,14 @@ exports.selectReview = (review_id) => {
 
 exports.selectComments = (review_id) => {
     return db.query("SELECT * FROM comments WHERE review_id = $1 ORDER BY created_at DESC", [review_id])
-        .then(({ rows }) => rows[0] === undefined ? Promise.reject({ status: 404, msg: "valid id not found" }) : rows)
+        .then(({ rows }) => rows[0] === undefined ? Promise.reject({ status: 404, msg: "no comments found associated with this id" }) : rows)
         .catch(err => Promise.reject(err));
+};
+
+exports.insertComment = (review_id, review) => {
+    return db.query('INSERT INTO comments (author, body, review_id) VALUES ($1, $2, $3) RETURNING* ;',
+        [review.username, review.body, review_id])
+        .then(({ rows }) => {
+            return rows[0];
+        }).catch((err) => Promise.reject(err));
 };

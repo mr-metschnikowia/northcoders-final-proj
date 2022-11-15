@@ -108,7 +108,7 @@ describe('3. GET /api/reviews/:review_id', () => {
     });
 });
 
-describe('3. GET /api/reviews/:review_id/comments', () => {
+describe('4. GET /api/reviews/:review_id/comments', () => {
     test('status:200, responds with array of comments associated with specific review_id sorted by date descending', () => {
         const REVIEW_ID = 3;
         return request(app)
@@ -137,7 +137,7 @@ describe('3. GET /api/reviews/:review_id/comments', () => {
             .get(`/api/reviews/10/comments`)
             .expect(404)
             .then(({ body }) => {
-                expect(body.msg).toBe("valid id not found")
+                expect(body.msg).toBe("no comments found associated with this id")
             })
 
     });
@@ -149,4 +149,79 @@ describe('3. GET /api/reviews/:review_id/comments', () => {
                 expect(body.msg).toBe("invalid data type")
             })
     });
+});
+
+describe('5. POST /api/reviews/:review_id/comments', () => {
+    test('status:201, responds with a new comment added to the database', () => {
+        const newComment = {
+            username: 'philippaclaire9',
+            body: 'this is a briliiant comment! :D'
+        };
+        return request(app)
+            .post('/api/reviews/4/comments')
+            .send(newComment)
+            .expect(201)
+            .then(({ body }) => {
+                expect(body.comment).toEqual(
+                    expect.objectContaining({
+                        comment_id: 7,
+                        review_id: 4,
+                        author: 'philippaclaire9',
+                        body: 'this is a briliiant comment! :D',
+                        votes: 0,
+                        created_at: expect.any(String)
+                    })
+                );
+            });
+    });
+    test('status:400, foreign key violation (username)', () => {
+        const newComment = {
+            username: 'dodgy_user123',
+            body: 'this is a briliiant comment! :D'
+        };
+        return request(app)
+            .post('/api/reviews/4/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("foreign key constraint violated");
+            });
+    });
+    test('status:400, foreign key violation (review_id)', () => {
+        const newComment = {
+            username: 'philippaclaire9',
+            body: 'this is a briliiant comment! :D'
+        };
+        return request(app)
+            .post('/api/reviews/400/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("foreign key constraint violated");
+            });
+    });
+    test('status:400, data type violation (review_id)', () => {
+        const newComment = {
+            username: 'philippaclaire9',
+            body: 'this is a briliiant comment! :D'
+        };
+        return request(app)
+            .post('/api/reviews/hello/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("invalid data type");
+            });
+    });
+    test('400 empty body', () => {
+        const newComment = {
+            username: 'philippaclaire9',
+            body: ""
+        };
+        return request(app)
+            .post('/api/reviews/4/comments')
+            .send(newComment)
+            .expect(400)
+            .then(({ body }) => expect(body.msg).toBe("body can't be empty"))
+    });  
 });
