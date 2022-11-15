@@ -184,7 +184,7 @@ describe('5. POST /api/reviews/:review_id/comments', () => {
             .send(newComment)
             .expect(400)
             .then(({ body }) => {
-                expect(body.msg).toBe("foreign key constraint violated");
+                expect(body.msg).toBe("invalid identifier");
             });
     });
     test('status:400, foreign key violation (review_id)', () => {
@@ -197,7 +197,7 @@ describe('5. POST /api/reviews/:review_id/comments', () => {
             .send(newComment)
             .expect(400)
             .then(({ body }) => {
-                expect(body.msg).toBe("foreign key constraint violated");
+                expect(body.msg).toBe("invalid identifier");
             });
     });
     test('status:400, data type violation (review_id)', () => {
@@ -224,4 +224,93 @@ describe('5. POST /api/reviews/:review_id/comments', () => {
             .expect(400)
             .then(({ body }) => expect(body.msg).toBe("body can't be empty"))
     });  
+});
+
+describe('3. PATCH /api/reviews/:review_id', () => {
+    it('status:200, responds with the updated review', () => {
+        const reviewUpdates = {
+            inc_votes: 3
+        };
+        return request(app)
+            .patch('/api/reviews/1')
+            .send(reviewUpdates)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.review).toEqual({
+                    review_id: 1,
+                    title: 'Agricola',
+                    designer: 'Uwe Rosenberg',
+                    owner: 'mallionaire',
+                    review_img_url:
+                        'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+                    review_body: 'Farmyard fun!',
+                    category: 'euro game',
+                    created_at: new Date(1610964020514).toISOString(),
+                    votes: 4
+                });
+            });
+    });
+    it('status:400 if given empty object', () => {
+        const reviewUpdates = {};
+        return request(app)
+            .patch('/api/reviews/1')
+            .send(reviewUpdates)
+            .expect(400)
+            .then(({ body }) => expect(body.msg).toBe("data missing from request body"))
+    });
+    it('ignores irrelevant props in update object', () => {
+        const reviewUpdates = {
+            inc_votes: 3,
+            randomOne: "hallelujah",
+            randomTwo: "wassup"
+        };
+        return request(app)
+            .patch('/api/reviews/1')
+            .send(reviewUpdates)
+            .expect(200)
+            .then(({ body }) => {
+                expect(body.review).toEqual({
+                    review_id: 1,
+                    title: 'Agricola',
+                    designer: 'Uwe Rosenberg',
+                    owner: 'mallionaire',
+                    review_img_url:
+                        'https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png',
+                    review_body: 'Farmyard fun!',
+                    category: 'euro game',
+                    created_at: new Date(1610964020514).toISOString(),
+                    votes: 4
+                });
+            });
+    });
+    it('no data associated with review id', () => {
+        const reviewUpdates = {
+            inc_votes: 3
+        };
+        return request(app)
+            .patch('/api/reviews/100')
+            .send(reviewUpdates)
+            .expect(404)
+            .then(({ body }) => expect(body.msg).toBe("review id not found"))
+    });
+    it('invalid data type (review id)', () => {
+        const reviewUpdates = {
+            inc_votes: 3
+        };
+        return request(app)
+            .patch('/api/reviews/hello')
+            .send(reviewUpdates)
+            .expect(400)
+            .then(({ body }) => expect(body.msg).toBe("invalid data type"))
+    });
+    it('invalid data type (inc-votes)', () => {
+        const reviewUpdates = {
+            inc_votes: "hello"
+        };
+        return request(app)
+            .patch('/api/reviews/1')
+            .send(reviewUpdates)
+            .expect(400)
+            .then(({ body }) => expect(body.msg).toBe("invalid data type"))
+    });
 });

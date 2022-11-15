@@ -1,4 +1,4 @@
-const { selectCategories, selectReviews, selectReview, selectComments, insertComment } = require("./model.js");
+const { selectCategories, selectReviews, selectReview, selectComments, insertComment, updateReview } = require("./model.js");
 
 exports.getCategories = (req, res) => {
     selectCategories().then(categories => res.status(200).send({ categories: categories }));
@@ -24,9 +24,26 @@ exports.postComment = (req, res, next) => {
         .catch(err => next(err))
 }
 
+exports.patchReview = (req, res, next) => {
+    updateReview(req.params.review_id, req.body)
+        .then(review => res.status(200).send({ review }))
+        .catch(err => next(err));
+};
+
+// request validation
+
 exports.validateComment = (req, res, next) => {
     if (req.body.body.length < 1) {
         res.status(400).send({ msg: "body can't be empty" });
+    }
+    else {
+        next();
+    }
+}
+
+exports.validateReviewUpdate = (req, res, next) => {
+    if (req.body.inc_votes === undefined) {
+        res.status(400).send({ msg: "data missing from request body" });
     }
     else {
         next();
