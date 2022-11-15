@@ -1,4 +1,4 @@
-const { selectCategories, selectReviews, selectReview, selectComments, insertComment, updateReview } = require("./model.js");
+const { selectCategories, selectReviews, selectReview, selectComments, insertComment, updateReview, selectUsers } = require("./model.js");
 
 exports.getCategories = (req, res) => {
     selectCategories().then(categories => res.status(200).send({ categories: categories }));
@@ -28,6 +28,10 @@ exports.patchReview = (req, res, next) => {
     updateReview(req.params.review_id, req.body)
         .then(review => res.status(200).send({ review }))
         .catch(err => next(err));
+};
+
+exports.getUsers = (req, res) => {
+    selectUsers().then(users => res.status(200).send({ users }))
 };
 
 // request validation

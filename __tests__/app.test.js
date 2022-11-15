@@ -226,7 +226,7 @@ describe('5. POST /api/reviews/:review_id/comments', () => {
     });  
 });
 
-describe('3. PATCH /api/reviews/:review_id', () => {
+describe('6. PATCH /api/reviews/:review_id', () => {
     it('status:200, responds with the updated review', () => {
         const reviewUpdates = {
             inc_votes: 3
@@ -312,5 +312,26 @@ describe('3. PATCH /api/reviews/:review_id', () => {
             .send(reviewUpdates)
             .expect(400)
             .then(({ body }) => expect(body.msg).toBe("invalid data type"))
+    });
+});
+
+describe('7. GET /api/users', () => {
+    test('status:200, responds with array of users', () => {
+        return request(app)
+            .get('/api/users')
+            .expect(200)
+            .then(({ body }) => {
+                const users = body.users;
+                expect(users).toHaveLength(4);
+                users.forEach((user) => {
+                    expect(user).toEqual(
+                        expect.objectContaining({
+                            username: expect.any(String),
+                            name: expect.any(String),
+                            avatar_url: expect.any(String)
+                        })
+                    );
+                });
+            });
     });
 });
