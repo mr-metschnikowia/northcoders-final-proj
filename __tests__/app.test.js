@@ -69,7 +69,7 @@ describe('2. GET /api/reviews', () => {
     });
 });
 
-describe.only('3. GET /api/reviews/:review_id', () => {
+describe('3. GET /api/reviews/:review_id', () => {
     test('status:200, responds with a single matching review', () => {
         const REVIEW_ID = 2;
         return request(app)
@@ -105,6 +105,48 @@ describe.only('3. GET /api/reviews/:review_id', () => {
             .then(({ body }) => {
                 expect(body.msg).toBe("invalid data type")
             })
+    });
+});
 
+describe('3. GET /api/reviews/:review_id/comments', () => {
+    test('status:200, responds with array of comments associated with specific review_id sorted by date descending', () => {
+        const REVIEW_ID = 3;
+        return request(app)
+            .get(`/api/reviews/${REVIEW_ID}/comments`)
+            .expect(200)
+            .then(({ body }) => {
+                const comments = body.comments;
+                expect(comments).toHaveLength(3);
+                comments.forEach((comment) => {
+                    expect(comment).toEqual(
+                        expect.objectContaining({
+                            review_id: REVIEW_ID,
+                            body: expect.any(String),
+                            votes: expect.any(Number),
+                            author: expect.any(String),
+                            comment_id: expect.any(Number),
+                            created_at: expect.any(String),
+                        })
+                    );
+                });
+                expect(comments).toBeSortedBy("created_at", { descending: true, coerce: true, });
+            });
+    });
+    test('valid id not found', () => {
+        return request(app)
+            .get(`/api/reviews/10/comments`)
+            .expect(404)
+            .then(({ body }) => {
+                expect(body.msg).toBe("valid id not found")
+            })
+
+    });
+    test('invalid id', () => {
+        return request(app)
+            .get(`/api/reviews/hello/comments`)
+            .expect(400)
+            .then(({ body }) => {
+                expect(body.msg).toBe("invalid data type")
+            })
     });
 });
