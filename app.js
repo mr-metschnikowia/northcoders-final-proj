@@ -2,7 +2,8 @@ const express = require('express');
 
 const {
     getCategories,
-    getReviews
+    getReviews,
+    getReview,
 } = require('./controller');
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(express.json());
 
 app.get('/api/categories', getCategories);
 app.get('/api/reviews', getReviews);
+app.get('/api/reviews/:review_id', getReview);
 
 app.all('/*', (req, res) => {
     res.status(404).send({ msg: 'Route not found' });
@@ -28,7 +30,7 @@ app.use((err, req, res, next) => {
     if (err.code === "23503") {
         res.status(400).send({ msg: "foreign key constraint violated" })
     } else if (err.code === "22P02") {
-        res.status(400).send({ msg: "invalid data type of property" })
+        res.status(400).send({ msg: "invalid data type" })
     } else next(err);
 })
 // handle psql error
