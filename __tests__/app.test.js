@@ -109,7 +109,7 @@ describe('3. GET /api/reviews/:review_id', () => {
 });
 
 describe('3. GET /api/reviews/:review_id/comments', () => {
-    test('status:200, responds with array of comments associated with specific review_id', () => {
+    test('status:200, responds with array of comments associated with specific review_id sorted by date descending', () => {
         const REVIEW_ID = 3;
         return request(app)
             .get(`/api/reviews/${REVIEW_ID}/comments`)
@@ -129,6 +129,7 @@ describe('3. GET /api/reviews/:review_id/comments', () => {
                         })
                     );
                 });
+                expect(comments).toBeSortedBy("created_at", { descending: true, coerce: true, });
             });
     });
     test('valid id not found', () => {
