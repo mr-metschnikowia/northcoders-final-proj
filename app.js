@@ -6,7 +6,9 @@ const {
     getReview,
     getComments,
     postComment,
-    validateComment
+    validateComment,
+    patchReview,
+    validateReviewUpdate
 } = require('./controller');
 
 const app = express();
@@ -18,6 +20,7 @@ app.get('/api/reviews', getReviews);
 app.get('/api/reviews/:review_id', getReview);
 app.get('/api/reviews/:review_id/comments', getComments);
 app.post('/api/reviews/:review_id/comments', validateComment, postComment);
+app.patch('/api/reviews/:review_id', validateReviewUpdate, patchReview)
 
 app.all('/*', (req, res) => {
     res.status(404).send({ msg: 'Route not found' });
@@ -33,7 +36,7 @@ app.use((err, req, res, next) => {
 
 app.use((err, req, res, next) => {
     if (err.code === "23503") {
-        res.status(400).send({ msg: "foreign key constraint violated" })
+        res.status(400).send({ msg: "invalid identifier" })
     } else if (err.code === "22P02") {
         res.status(400).send({ msg: "invalid data type" })
     } else next(err);
