@@ -5,10 +5,7 @@ exports.selectCategories = () => {
         .then(({ rows }) => rows);
 };
 
-exports.selectReviews = (category, sort_by, order = "DESC") => {
-    const columns = ["created_at", "votes", "comment_count"];
-    const validatedSortBy = columns.includes(sort_by) ? sort_by : "created_at";
-    const validatedOrderBy = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+exports.selectReviews = (category, sort_by = "created_at", order = "DESC") => {
 
     let query = 'SELECT owner, title, review_id, category, review_img_url, created_at, votes, designer,  (SELECT COUNT(comment_id) FROM comments WHERE reviews.review_id = comments.review_id) as comment_count FROM reviews';
     let queryVars = [];
@@ -17,10 +14,11 @@ exports.selectReviews = (category, sort_by, order = "DESC") => {
         query += " WHERE category = $1";
         queryVars.push(category);
     }
-    query += ` ORDER BY ${validatedSortBy} ${validatedOrderBy};`;
+
+    query += ` ORDER BY ${sort_by} ${order};`;
 
     return db.query(query, queryVars)
-        .then(({ rows }) => rows[0] === undefined ? Promise.reject({ status: 404, msg: "category doesn't exist" }) : rows);
+        .then(({ rows }) => rows[0] === undefined ? Promise.reject({ status: 404, msg: "no review associated with this category" }) : rows);
 };
 
 exports.selectReview = (review_id, comment_count) => {

@@ -41,6 +41,17 @@ exports.getUsers = (req, res) => {
 
 // request validation
 
+exports.validateReviewsQueries = (req, res, next) => {
+    const columns = ["created_at", "votes", "comment_count"];
+    if (req.query.sort_by && !columns.includes(req.query.sort_by)) {
+        res.status(400).send({ msg: "column doesn't exist" })
+    } else if (req.query.order && req.query.order.toUpperCase() !== "ASC" && req.query.order.toUpperCase() !== "DESC") {
+        res.status(400).send({ msg: `cannot order by ${req.query.order}` })
+    } else {
+        next();
+    }
+};
+
 exports.validateComment = (req, res, next) => {
     if (req.body.body.length < 1) {
         res.status(400).send({ msg: "body can't be empty" });
