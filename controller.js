@@ -4,8 +4,10 @@ exports.getCategories = (req, res) => {
     selectCategories().then(categories => res.status(200).send({ categories: categories }));
 };
 
-exports.getReviews = (req, res) => {
-    selectReviews().then(reviews => res.status(200).send({ reviews: reviews }));
+exports.getReviews = (req, res, next) => {
+    selectReviews(req.query.category, req.query.sort_by, req.query.order)
+        .then(reviews => res.status(200).send({ reviews: reviews }))
+        .catch(err => next(err))
 };
 
 exports.getReview = (req, res, next) => {
@@ -38,6 +40,17 @@ exports.getUsers = (req, res) => {
 };
 
 // request validation
+
+exports.validateReviewsQueries = (req, res, next) => {
+    const columns = ["created_at", "votes", "comment_count"];
+    if (req.query.sort_by && !columns.includes(req.query.sort_by)) {
+        res.status(400).send({ msg: "column doesn't exist" })
+    } else if (req.query.order && req.query.order.toUpperCase() !== "ASC" && req.query.order.toUpperCase() !== "DESC") {
+        res.status(400).send({ msg: `cannot order by ${req.query.order}` })
+    } else {
+        next();
+    }
+};
 
 exports.validateComment = (req, res, next) => {
     if (req.body.body.length < 1) {
