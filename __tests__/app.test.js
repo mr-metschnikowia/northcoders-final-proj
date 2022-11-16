@@ -418,3 +418,204 @@ describe("8. comment_count feature", () => {
             });
     });
 })
+
+describe("9. Reviews queries", () => {
+    describe("queries: category", () => {
+        test('valid category, exists', () => {
+            return request(app)
+                .get('/api/reviews?category=social deduction')
+                .expect(200)
+                .then(({ body }) => {
+                    const reviews = body.reviews;
+                    expect(reviews).toHaveLength(11);
+                    reviews.forEach((review) => {
+                        expect(review).toEqual(
+                            expect.objectContaining({
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: expect.any(String),
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                                comment_count: expect.any(String),
+                                owner: expect.any(String),
+                            })
+                        );
+                    });
+                    expect(reviews).toBeSortedBy("created_at", { descending: true, coerce: true, });
+                });
+        });
+
+        test('category doesn\'t exist', () => {
+            return request(app)
+                .get('/api/reviews?category=rando mando')
+                .expect(404)
+                .then(({ body }) => expect(body.msg).toBe("category doesn't exist"));
+        });
+    })
+
+    describe("queries: sort_by", () => {
+        test('queries: valid sort_by', () => {
+            return request(app)
+                .get('/api/reviews?sort_by=comment_count')
+                .expect(200)
+                .then(({ body }) => {
+                    const reviews = body.reviews;
+                    expect(reviews).toHaveLength(13);
+                    reviews.forEach((review) => {
+                        expect(review).toEqual(
+                            expect.objectContaining({
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: expect.any(String),
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                                comment_count: expect.any(String),
+                                owner: expect.any(String),
+                            })
+                        );
+                    });
+                    expect(reviews).toBeSortedBy("comment_count", { descending: true, coerce: true, });
+                });
+
+        });
+
+        test('queries: invalid sort_by: sorts by default created_at', () => {
+            return request(app)
+                .get('/api/reviews?sort_by=mambo_jambo')
+                .expect(200)
+                .then(res => {
+                    const reviews = res.body.reviews;
+                    expect(reviews).toHaveLength(13);
+                    reviews.forEach((review) => {
+                        expect(review).toEqual(
+                            expect.objectContaining({
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: expect.any(String),
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                                comment_count: expect.any(String),
+                                owner: expect.any(String),
+                            })
+                        );
+                    });
+                    expect(reviews).toBeSortedBy("created_at", { descending: true, coerce: true, });
+                });
+        });
+    })
+
+    describe("queries: order_by", () => {
+        test('valid order_by asc', () => {
+            return request(app)
+                .get('/api/reviews?order_by=asc')
+                .expect(200)
+                .then(({ body }) => {
+                    const reviews = body.reviews;
+                    expect(reviews).toHaveLength(13);
+                    reviews.forEach((review) => {
+                        expect(review).toEqual(
+                            expect.objectContaining({
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: expect.any(String),
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                                comment_count: expect.any(String),
+                                owner: expect.any(String),
+                            })
+                        );
+                    });
+                    expect(reviews).toBeSortedBy("created_at", { coerce: true, });
+                });
+        });
+
+        test('valid order_by desc', () => {
+            return request(app)
+                .get('/api/reviews?order_by=desc')
+                .expect(200)
+                .then(({ body }) => {
+                    const reviews = body.reviews;
+                    expect(reviews).toHaveLength(13);
+                    reviews.forEach((review) => {
+                        expect(review).toEqual(
+                            expect.objectContaining({
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: expect.any(String),
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                                comment_count: expect.any(String),
+                                owner: expect.any(String),
+                            })
+                        );
+                    });
+                    expect(reviews).toBeSortedBy("created_at", { descending: true, coerce: true, });
+                });
+        });
+
+        test('invalid order_by: default orders by values descending', () => {
+            return request(app)
+                .get('/api/reviews?order_by=babaganush')
+                .expect(200)
+                .then(res => {
+                    const reviews = res.body.reviews;
+                    expect(reviews).toHaveLength(13);
+                    reviews.forEach((review) => {
+                        expect(review).toEqual(
+                            expect.objectContaining({
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: expect.any(String),
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                                comment_count: expect.any(String),
+                                owner: expect.any(String),
+                            })
+                        );
+                    });
+                    expect(reviews).toBeSortedBy("created_at", { descending: true, coerce: true, });
+                });
+        });
+    })
+
+    describe.only("compund query", () => {
+        test('queries: filter by category, sort by comment count, ascending', () => {
+            return request(app)
+                .get('/api/reviews?category=social deduction&sort_by=comment_count&order=asc')
+                .expect(200)
+                .then(({ body }) => {
+                    const reviews = body.reviews;
+                    expect(reviews).toHaveLength(11);
+                    reviews.forEach((review) => {
+                        expect(review).toEqual(
+                            expect.objectContaining({
+                                title: expect.any(String),
+                                review_id: expect.any(Number),
+                                category: expect.any(String),
+                                review_img_url: expect.any(String),
+                                created_at: expect.any(String),
+                                votes: expect.any(Number),
+                                designer: expect.any(String),
+                                comment_count: expect.any(String),
+                                owner: expect.any(String),
+                            })
+                        );
+                    });
+                    expect(reviews).toBeSortedBy("comment_count");
+                });
+
+        });
+    })
+})

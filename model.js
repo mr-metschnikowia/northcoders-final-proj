@@ -5,9 +5,22 @@ exports.selectCategories = () => {
         .then(({ rows }) => rows);
 };
 
-exports.selectReviews = () => {
-    return db.query("SELECT owner, title, review_id, category, review_img_url, created_at, votes, designer,  (SELECT COUNT(comment_id) FROM comments WHERE reviews.review_id = comments.review_id) as comment_count FROM reviews ORDER BY created_at DESC;")
-        .then(({ rows }) => rows);
+exports.selectReviews = (category, sort_by, order = "DESC") => {
+    const columns = ["created_at", "votes", "comment_count"];
+    const validatedSortBy = columns.includes(sort_by) ? sort_by : "created_at";
+    const validatedOrderBy = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    let query = 'SELECT owner, title, review_id, category, review_img_url, created_at, votes, designer,  (SELECT COUNT(comment_id) FROM comments WHERE reviews.review_id = comments.review_id) as comment_count FROM reviews';
+    let queryVars = [];
+
+    if (category) {
+        query += " WHERE category = $1";
+        queryVars.push(category);
+    }
+    query += ` ORDER BY ${validatedSortBy} ${validatedOrderBy};`;
+
+    return db.query(query, queryVars)
+        .then(({ rows }) => rows[0] === undefined ? Promise.reject({ status: 404, msg: "category doesn't exist" }) : rows);
 };
 
 exports.selectReview = (review_id, comment_count) => {
