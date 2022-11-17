@@ -16,7 +16,7 @@
   },
   "GET /api/reviews": {
     "description": "serves an array of all reviews",
-    "queries": [ "category", "sort_by", "order"],
+    "queries": [ "category", "sort_by", "order" ],
     "exampleResponse": {
       "reviews": [
         {
@@ -30,5 +30,92 @@
         }
       ]
     }
+  },
+  "GET /api/reviews/:review_id": {
+    "description": "get a specific review by id",
+    "queries": [ "comment_count" ],
+    "exampleResponse": {
+      "review": {
+        "review_id": 1,
+        "title": "Agricola",
+        "designer": "Uwe Rosenberg",
+        "owner": "mallionaire",
+        "review_img_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+        "review_body": "Farmyard fun!",
+        "category": "euro game",
+        "created_at": 1610964101251
+      }
+    }
+  },
+  "GET /api/reviews/:review_id/comments": {
+    "description": "get all comments associated with a particular review",
+    "queries": [],
+    "exampleResponse": {
+      "comments": [
+        {
+          "review_id": 1,
+          "body": "mumbo jambo",
+          "votes": 16,
+          "author": "Stella Artois",
+          "comment_id": 26,
+          "created_at": 1610964101251
+        }
+      ]
+    }
+  },
+  "POST /api/reviews/:review_id/comments": {
+    "description": "post new comment associated with a specific review",
+    "queries": [],
+    "exampleBody": {
+      "username": "philippaclaire9",
+      "body": "this is a briliiant comment! :D"
+    },
+    "exampleResponse": {
+      "comment": {
+        "comment_id": 7,
+        "review_id": 4,
+        "author": "philippaclaire9",
+        "body": "this is a briliiant comment! :D",
+        "votes": 0,
+        "created_at": 1610964101251
+      }
+    }
+  },
+  "PATCH /api/reviews/:review_id": {
+    "description": "update a specific review by id",
+    "queries": [],
+    "exampleBody": {
+      "inc_votes": 3
+    },
+    "exampleResponse": {
+      "review": {
+        "review_id": 1,
+        "title": "Agricola",
+        "designer": "Uwe Rosenberg",
+        "owner": "mallionaire",
+        "review_img_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+        "review_body": "Farmyard fun!",
+        "category": "euro game",
+        "created_at": 1610964101251,
+        "votes": 4
+      }
+    }
+  },
+  "GET /api/users": {
+    "description": "get all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "username": "BamboJambo",
+          "name": "JamboBambo",
+          "avatar_url": "https://BamboJambo.com/free-money-now"
+        }
+      ]
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "delete specific comment by id",
+    "queries": []
   }
 }

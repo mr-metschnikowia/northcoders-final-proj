@@ -1,4 +1,5 @@
 const { selectCategories, selectReviews, selectReview, selectComments, insertComment, updateReview, selectUsers, removeComment } = require("./model.js");
+const endpoints = require("./endpoints.json");
 
 exports.getCategories = (req, res) => {
     selectCategories().then(categories => res.status(200).send({ categories: categories }));
@@ -44,6 +45,10 @@ exports.deleteComment = (req, res, next) => {
         .then(comment => res.status(204).send({ comment }))
         .catch(err => next(err));
 };
+
+exports.getApi = (req, res, next) => {
+    res.status(200).send({ endpoints });
+}
 
 // request validation
 
