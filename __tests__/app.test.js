@@ -552,7 +552,7 @@ describe("9. Reviews queries", () => {
         });
     })
 
-    describe("compund query", () => {
+    describe("compound query", () => {
         test('queries: filter by category, sort by comment count, ascending', () => {
             return request(app)
                 .get('/api/reviews?category=social deduction&sort_by=comment_count&order=asc')
@@ -581,3 +581,15 @@ describe("9. Reviews queries", () => {
         });
     })
 })
+
+describe('10. DELETE /api/comments/:comment_id', () => {
+    test('valid comment id exists', () => {
+        return request(app).delete('/api/comments/1').expect(204);
+    });
+    test('invalid comment id', () => {
+        return request(app).delete('/api/comments/hello').expect(400).then(({ body }) => expect(body.msg).toBe("invalid data type"));
+    });
+    test('valid comment id, comment doesn\'t exist in relation', () => {
+        return request(app).delete('/api/comments/100').expect(404).then(({ body }) => expect(body.msg).toBe("comment not found"));
+    });
+});
