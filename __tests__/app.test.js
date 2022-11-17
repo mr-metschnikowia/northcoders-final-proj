@@ -3,6 +3,7 @@ const app = require('../app');
 const db = require('../db/connection');
 const data = require('../db/data/test-data');
 const seed = require('../db/seeds/seed');
+const endpoints = require("../endpoints.json");
 
 beforeEach(() => seed(data));
 
@@ -589,7 +590,14 @@ describe('10. DELETE /api/comments/:comment_id', () => {
     test('invalid comment id', () => {
         return request(app).delete('/api/comments/hello').expect(400).then(({ body }) => expect(body.msg).toBe("invalid data type"));
     });
-    test('valid comment id, comment doesn\'t exist in relation', () => {
+    test("valid comment id, comment doesn't exist in relation", () => {
         return request(app).delete('/api/comments/100').expect(404).then(({ body }) => expect(body.msg).toBe("comment not found"));
+    });
+});
+
+describe('11. GET /api', () => {
+    test('sends back expected JSON object', () => {
+        return request(app).get('/api').expect(200)
+            .then(({ body }) => expect(body.endpoints).toEqual(endpoints))
     });
 });
