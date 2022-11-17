@@ -52,3 +52,8 @@ exports.selectUsers = () => {
     return db.query("SELECT username, name, avatar_url FROM users;")
         .then(({ rows }) => rows);
 };
+
+exports.removeComment = (comment_id) => {
+    return db.query("DELETE from comments WHERE comment_id = $1 RETURNING *", [comment_id])
+        .then(({ rows }) =>  rows[0] === undefined ? Promise.reject({ status: 404, msg: "comment not found" }) : rows[0])
+}

@@ -1,4 +1,4 @@
-const { selectCategories, selectReviews, selectReview, selectComments, insertComment, updateReview, selectUsers } = require("./model.js");
+const { selectCategories, selectReviews, selectReview, selectComments, insertComment, updateReview, selectUsers, removeComment } = require("./model.js");
 
 exports.getCategories = (req, res) => {
     selectCategories().then(categories => res.status(200).send({ categories: categories }));
@@ -36,6 +36,12 @@ exports.patchReview = (req, res, next) => {
 exports.getUsers = (req, res) => {
     selectUsers()
         .then(users => res.status(200).send({ users }))
+        .catch(err => next(err));
+};
+
+exports.deleteComment = (req, res, next) => {
+    removeComment(req.params.comment_id)
+        .then(comment => res.status(204).send({ comment }))
         .catch(err => next(err));
 };
 
